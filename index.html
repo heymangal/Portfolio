@@ -14,6 +14,35 @@
   <link href="css/jay.css" rel="stylesheet">
   <link rel="icon" href="images/newlogo.png" type="image/x-icon">
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,700" rel="stylesheet">
+
+
+<script>
+  async function logVisitor() {
+    const ipRes = await fetch("https://ipapi.co/json/");
+    const ipData = await ipRes.json();
+
+    const visitorInfo = {
+      ipAddress: ipData.ip,
+      country: ipData.country_name,
+      browser: navigator.userAgent,
+      device: /Mobi|Android/i.test(navigator.userAgent) ? "Mobile" : "Desktop",
+    };
+
+    fetch("https://script.google.com/macros/s/AKfycbwMFsnYgGNgvTEk5ff4Qm5lcx7qEj1oSmyxIzEGid4GwA8tU7ZPziSvJ0lPVBC88FFS/exec", {
+      method: "POST",
+      body: JSON.stringify(visitorInfo),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  }
+
+  logVisitor();
+</script>
+
+
+
+
 </head>
 
 <body>
