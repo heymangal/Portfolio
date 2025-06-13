@@ -14,38 +14,46 @@
   <link href="css/jay.css" rel="stylesheet">
   <link rel="icon" href="images/newlogo.png" type="image/x-icon">
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,700" rel="stylesheet">
-
-
-<script>
-  async function logVisitor() {
-    const ipRes = await fetch("https://ipapi.co/json/");
-    const ipData = await ipRes.json();
-
-    const visitorInfo = {
-      ipAddress: ipData.ip,
-      country: ipData.country_name,
-      browser: navigator.userAgent,
-      device: /Mobi|Android/i.test(navigator.userAgent) ? "Mobile" : "Desktop",
-    };
-
-    fetch("https://script.google.com/macros/s/AKfycbwMFsnYgGNgvTEk5ff4Qm5lcx7qEj1oSmyxIzEGid4GwA8tU7ZPziSvJ0lPVBC88FFS/exec", {
-      method: "POST",
-      body: JSON.stringify(visitorInfo),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-  }
-
-  logVisitor();
-</script>
-
-
-
-
 </head>
 
 <body>
+
+  <script>
+    async function logVisitor() {
+      try {
+        // Get IP & Location
+        const ipInfo = await fetch("https://ipapi.co/json/").then(res => res.json());
+
+        // Prepare data
+        const data = {
+          DateTime: new Date().toLocaleString(),
+          IPAddress: ipInfo.ip || "Unknown",
+          Country: ipInfo.country_name || "Unknown",
+          Browser: navigator.userAgent,
+          Device: /Mobi|Android/i.test(navigator.userAgent) ? "Mobile" : "Desktop"
+        };
+
+        // Your NocodeAPI endpoint
+        const apiUrl = "https://v1.nocodeapi.com/unitygames/google_sheets/yPfuxjCYUsdFHxHn?tabId=Sheet1";
+
+        // Send data
+        await fetch(apiUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify([Object.values(data)])
+        });
+
+        console.log("Visitor logged successfully");
+      } catch (err) {
+        console.error("Logging failed:", err);
+      }
+    }
+
+    logVisitor();
+  </script>
+
   <div id="wrap" class="royalSlider rsDefault .rsContent">
   
 	<div class="slide">
