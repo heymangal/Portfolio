@@ -18,41 +18,64 @@
 
 <body>
 
-  <script>
-    async function logVisitor() {
-      try {
-        // Get IP & Location
-        const ipInfo = await fetch("https://ipapi.co/json/").then(res => res.json());
+    <script>
+      const apiKey = "yPfuxjCYUsdFHxHn"; // NoCodeAPI endpoint key
+      const sheetURL = `https://v1.nocodeapi.com/unitygames/google_sheets/${apiKey}`;
+      const logKey = 'visitor_logged';
 
-        // Prepare data
-        const data = {
-          DateTime: new Date().toLocaleString(),
-          IPAddress: ipInfo.ip || "Unknown",
-          Country: ipInfo.country_name || "Unknown",
-          Browser: navigator.userAgent,
-          Device: /Mobi|Android/i.test(navigator.userAgent) ? "Mobile" : "Desktop"
-        };
-
-        // Your NocodeAPI endpoint
-        const apiUrl = "https://v1.nocodeapi.com/unitygames/google_sheets/yPfuxjCYUsdFHxHn?tabId=Sheet1";
-
-        // Send data
-        await fetch(apiUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify([Object.values(data)])
-        });
-
-        console.log("Visitor logged successfully");
-      } catch (err) {
-        console.error("Logging failed:", err);
+      function hasAlreadyLogged() {
+        return localStorage.getItem(logKey) === 'true';
       }
-    }
 
-    logVisitor();
-  </script>
+      function setLoggedFlag() {
+        localStorage.setItem(logKey, 'true');
+      }
+
+      function getVisitorData() {
+        return {
+          date: new Date().toLocaleString(),
+          ip: '', // optional, can be filled via IP API
+          country: '',
+          browser: navigator.userAgent,
+          device: navigator.platform
+        };
+      }
+
+      function logVisitor(visitorData) {
+        return fetch(sheetURL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify([
+            [
+              visitorData.date,
+              visitorData.ip,
+              visitorData.country,
+              visitorData.browser,
+              visitorData.device
+            ]
+          ])
+        });
+      }
+
+      function tryLogVisitor() {
+        if (!hasAlreadyLogged()) {
+          const data = getVisitorData();
+          logVisitor(data)
+            .then(res => res.json())
+            .then(response => {
+              console.log("Visitor logged:", response);
+              setLoggedFlag();
+            })
+            .catch(err => console.error("Logging failed:", err));
+        } else {
+          console.log("Already logged this visitor.");
+        }
+      }
+
+      // Run it
+      tryLogVisitor();
+    </script>
+
 
   <div id="wrap" class="royalSlider rsDefault .rsContent">
   
